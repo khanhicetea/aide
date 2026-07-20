@@ -26,6 +26,18 @@ install_pi() {
   "${pi_command[@]}" install npm:@juicesharp/rpiv-ask-user-question
   "${pi_command[@]}" install npm:pi-powerline-footer
   "${pi_command[@]}" install npm:pi-xai-oauth
+  "${pi_command[@]}" install git:github.com/khanhicetea/web-access-kit@main
+}
+
+install_agy() {
+  log "Installing agy"
+  curl -fsSL https://antigravity.google/cli/install.sh | bash
+
+  local token_file="$HOME/.gemini/antigravity-cli/antigravity-oauth-token"
+  if [[ ! -f "$token_file" ]]; then
+    install -d -m 0755 "$HOME/.gemini/antigravity-cli"
+    touch "$token_file"
+  fi
 }
 
 sync_agents() {
@@ -36,5 +48,8 @@ sync_agents() {
   install_pi
   install -d -m 0755 "$HOME/.agents"
   cp -a "$source/." "$HOME/.agents/"
+
+  install_agy
+
   log "Copied repository agents to $HOME/.agents"
 }
