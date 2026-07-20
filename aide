@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+AIDE_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+export AIDE_ROOT
+
+# shellcheck source=lib/common.sh
+source "$AIDE_ROOT/lib/common.sh"
+# shellcheck source=lib/tools.sh
+source "$AIDE_ROOT/lib/tools.sh"
+# shellcheck source=lib/user.sh
+source "$AIDE_ROOT/lib/user.sh"
+# shellcheck source=lib/agents.sh
+source "$AIDE_ROOT/lib/agents.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: ./aide [command] [options]
+
+Commands:
+  setup     Install tools, configure the user, and sync agents (default)
+  tools     Install mise system-wide and Node.js LTS for the current user
+  user      Configure user npm PATH, SSH key, and GitHub authorized keys
+  agents    Install pi and extensions, then sync .agents to ~/.agents
+  help      Show this help
+
+Options:
+  --github-user USER  GitHub account whose public keys are authorized
+                      (default: khanhicetea)
+
+Environment:
+  AIDE_GITHUB_USER    Alternative way to set the GitHub account
+  AIDE_NODE_VERSION   mise Node version (default: lts)
+EOF
+}
+
+main() {
+  local command="setup"
+  AIDE_GITHUB_USER="${AIDE_GITHUB_USER:-khanhicetea}"
+
+  if (($#)) && [[ "$1" != --* ]]; then
+    command="$1"
+    shift
+  fi
+
+  while (($#)); do
+    case "$1" in
+      --github-user)
+        [[ $# -ge 2 ]] || die "--github-user needs a value"
+        AIDE_GITHUB_USER="$2"
+        shift 2
+        ;;
+      -h|--help) usage; exit 0 ;;
+      *) die "unknown option: $1" ;;
+    esac
+  done
+  export AIDE_GITHUB_USER
+
+  case "$command" in
+    setup) setup_tools; configure_user; sync_agents ;;
+    tools) setup_tools ;;
+    user) configure_user ;;
+    agents) sync_agents ;;
+    help|-h|--help) usage ;;
+    *) usage >&2; die "unknown command: $command" ;;
+  esac
+}
+
+main "$@"
