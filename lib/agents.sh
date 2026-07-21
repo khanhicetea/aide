@@ -26,6 +26,7 @@ install_pi() {
   "${pi_command[@]}" install npm:@juicesharp/rpiv-ask-user-question
   "${pi_command[@]}" install npm:pi-powerline-footer
   "${pi_command[@]}" install npm:pi-xai-oauth
+  "${pi_command[@]}" install git:github.com/khanhicetea/pi-multi-codex@main
   "${pi_command[@]}" install git:github.com/khanhicetea/web-access-kit@main
 }
 
